@@ -1,0 +1,16 @@
+version: v1
+name: buf.build/meshtastic/protobufs
+deps: []
+build:
+  excludes: []
+breaking:
+  use:
+    - FILE
+  ignore:
+    - FILE_OPTION_CHANGED
+lint:
+  ignore_only:
+    PACKAGE_DEFINED:
+      - nanopb.proto
+  use:
+    - MINIMAL
