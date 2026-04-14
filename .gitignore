@@ -14,7 +14,6 @@
 /captures
 .externalNativeBuild
 .cxx
-/app/release
 /buildSrc/build
 **/debug/**
 **/release/**
