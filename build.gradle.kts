@@ -75,21 +75,8 @@ kover {
 }
 
 dependencies {
-    kover(projects.app)
     kover(projects.meshServiceExample)
-
-    kover(projects.core.analytics)
-    kover(projects.core.common)
-    kover(projects.core.data)
-    kover(projects.core.datastore)
     kover(projects.core.model)
-    kover(projects.core.navigation)
-    kover(projects.core.network)
-    kover(projects.core.prefs)
-    kover(projects.feature.intro)
-    kover(projects.feature.map)
-    kover(projects.feature.node)
-    kover(projects.feature.settings)
 }
 
 dependencyAnalysis {

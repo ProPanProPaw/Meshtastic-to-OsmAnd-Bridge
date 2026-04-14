@@ -16,25 +16,11 @@
  */
 
 include(
-    ":app",
-    ":core:analytics",
-    ":core:common",
-    ":core:data",
     ":core:database",
-    ":core:datastore",
-    ":core:di",
     ":core:model",
-    ":core:navigation",
-    ":core:network",
-    ":core:prefs",
     ":core:proto",
     ":core:service",
     ":core:strings",
-    ":core:ui",
-    ":feature:intro",
-    ":feature:map",
-    ":feature:node",
-    ":feature:settings",
     ":mesh_service_example",
 )
 rootProject.name = "MeshtasticAndroid"
