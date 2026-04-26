@@ -21,7 +21,7 @@ include(
     ":core:proto",
     ":core:service",
     ":core:strings",
-    ":mesh_service_example",
+    ":app",
 )
 rootProject.name = "Meshtastic-to-OsmAnd-Bridge"
 

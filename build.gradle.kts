@@ -75,7 +75,7 @@ kover {
 }
 
 dependencies {
-    kover(projects.meshServiceExample)
+    kover(projects.app)
     kover(projects.core.model)
 }
 

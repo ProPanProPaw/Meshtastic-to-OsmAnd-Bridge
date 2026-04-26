@@ -1,6 +1,4 @@
 <resources>
-    <string name="app_name" translatable="false">Meshtastic to Osmand Bridge</string>
-
     <string name="unrecognized">Unrecognized</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_queued">Queued for sending</string>

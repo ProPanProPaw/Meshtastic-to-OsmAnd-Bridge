@@ -22,7 +22,7 @@ The project is organized into the following modules:
 
 -   `app/`: The main Android application.
 -   `network/`: A library module containing the offline-first networking logic for communicating with the Meshtastic http json api for device hardware and firmware information.
--   `mesh_service_example/`: An example application demonstrating how to use the AIDL interface to interact with mesh service provided by the main application.
+-   `app/`: An example application demonstrating how to use the AIDL interface to interact with mesh service provided by the main application.
 -   `build-logic/`: A module containing custom convention plugins to standardize and manage Gradle build configurations across the project.
 
 ## Commands to Build & Test
