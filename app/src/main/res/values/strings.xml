@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Mesh to Osmand</string>
+    <string name="app_name">Mesh to OsmAnd</string>
     <string name="send_hello_message">Send Hello Message</string>
 </resources>
