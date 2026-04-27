@@ -417,6 +417,7 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
 
         upsertLastPositionOsmandWidget(widgetInfo)
         upsertLastHeardAtOsmandWidget(widgetInfo)
+        upsertBatteryLevelOsmandWidget(widgetInfo)
     }
 
 
@@ -436,7 +437,7 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         val darkIconName = "ic_action_time"
 
         val lastPositionSecondsAgo = TimeHelper.toSecondsAgo(widgetInfo.positionTime)
-        val momentAgo = TimeHelper.toMomentAgo(lastPositionSecondsAgo)
+        val momentAgo = MomentAgo(lastPositionSecondsAgo)
 
         val locationAgoSymbol = if (lastPositionSecondsAgo <= 30) "🟢"
         else if (lastPositionSecondsAgo < 90) "🟡"
@@ -453,9 +454,14 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
 
         val all = null
         val none = emptyList<String>()
+        val APP_MODE_BICYCLE = "bicycle"
+        val bicycle = listOf(APP_MODE_BICYCLE)
 
         Handler(Looper.getMainLooper()).postDelayed({
-            OsmAndHolder.aidlHelper?.regWidgetVisibility(widgetId, all)
+
+            val res = OsmAndHolder.aidlHelper?.regWidgetAvailability(widgetId, bicycle)
+
+            val res2 = OsmAndHolder.aidlHelper?.regWidgetVisibility(widgetId, bicycle)
         }, 700)
     }
 
@@ -476,7 +482,7 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         val darkIconName = "ic_action_time"
 
         val lastHeardSecondsAgo = TimeHelper.toSecondsAgo(widgetInfo.lastHeardAt)
-        val momentAgo = TimeHelper.toMomentAgo(lastHeardSecondsAgo)
+        val momentAgo = MomentAgo(lastHeardSecondsAgo)
 
         val symbol = if (lastHeardSecondsAgo <= 30) "💚"
         else if (lastHeardSecondsAgo < 90) "💛"

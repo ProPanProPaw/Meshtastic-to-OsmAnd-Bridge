@@ -18,16 +18,16 @@ class TimeHelper {
             return sdf.format(Date(timeInMs))
         }
 
-        fun toSecondsAgo(time: Int): Int {
+        fun toSecondsAgo(timeMs: Int): Int {
             val currentTime = System.currentTimeMillis();
-            val secondsAgo = (currentTime / 1000 - time).toInt();
+            val secondsAgo = (currentTime / 1000 - timeMs).toInt();
 
             return secondsAgo
         }
 
-        fun toMomentAgo(time: Int): MomentAgo {
+        fun toMomentAgo(timeMs: Int): MomentAgo {
 
-            val secondsAgo = toSecondsAgo(time);
+            val secondsAgo = toSecondsAgo(timeMs);
 
             return MomentAgo(secondsAgo)
         }
@@ -64,6 +64,11 @@ class MomentAgo {
     }
 
     override fun toString(): String {
+
+        if(value == 0) {
+            return prefix
+        }
+
         return "${value}${prefix}"
     }
 }
