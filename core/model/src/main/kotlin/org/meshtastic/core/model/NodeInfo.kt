@@ -95,6 +95,8 @@ data class Position(
         position: MeshProtos.Position,
         defaultTime: Int = currentTime(),
     ) : this(
+
+        // TODO: position.seqNumber
         // We prefer the int version of lat/lon but if not available use the depreciated legacy version
         degD(position.latitudeI),
         degD(position.longitudeI),

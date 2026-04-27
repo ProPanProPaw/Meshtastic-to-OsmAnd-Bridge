@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
+import kotlin.random.Random
 
 
 public data class Item(val userId: String, val value: NodeInfo)
@@ -35,30 +36,7 @@ public class GroupedSortedList {
     fun getGroup(userId: String): List<Item> = groups[userId].orEmpty()
     fun allGroups(): Map<String, List<Item>> = groups
 
-    private fun epochToIso8601(timeInMs: Long, format: String = "dd MMM yyyy HH:mm:ss"): String {
-        val sdf = SimpleDateFormat(format, Locale.getDefault())
-        sdf.timeZone = TimeZone.getDefault()
-        return sdf.format(Date(timeInMs))
-    }
 
-    fun toSecondsAgo(time: Int): Long {
-        val currentTime = System.currentTimeMillis();
-        val secondsAgo = (currentTime / 1000 - time);
-
-        return secondsAgo
-    }
-
-    fun toMomentAgo(time: Int): String {
-
-        val secondsAgo = toSecondsAgo(time);
-
-        val textAgo = if (secondsAgo < 1) "now"
-        else if (secondsAgo < 60) "${secondsAgo}s ago"
-        else if (secondsAgo < 3600) "${(secondsAgo/60).toInt()}m ago"
-        else "${(secondsAgo/3600).toInt()}h ago"
-
-        return textAgo
-    }
 
 
     fun generateBitmap(node: NodeInfo): Bitmap? {
@@ -70,25 +48,10 @@ public class GroupedSortedList {
     }
 
 
-    fun getFirstCodePoint(text: String?): String? {
-
-        if(text == null) {
-            return null
-        }
-
-        val symbol = text.let {
-            val cp = it.codePointAt(0)
-            String(Character.toChars(cp))
-        }
-
-        return symbol
-    }
-
-
 
     fun generateBitmap(shortName: String?, textColor: Int = Color.BLACK, backgroundColor: Int = Color.TRANSPARENT): Bitmap? {
 
-        val symbol = getFirstCodePoint(shortName)
+        val symbol = StringHelper.getFirstCodePoint(shortName)
 
         if(symbol == null) {
             return null
@@ -127,26 +90,27 @@ public class GroupedSortedList {
                 lastItem.value.position?.let { position ->
 
                     val nodeInfo = lastItem.value
-                    var shortName = getFirstCodePoint(nodeInfo.user?.shortName) ?: "❓"
+                    var shortName = StringHelper.getFirstCodePoint(nodeInfo.user?.shortName) ?: "❓"
 
                     val shortTimeFormat = "mm:ss"
-                    val lastPositionAtFormated = epochToIso8601(position.time * 1000.toLong(), shortTimeFormat)
+                    val lastPositionAtFormated = TimeHelper.epochToIso8601(position.time * 1000.toLong(), shortTimeFormat)
 
 
-                    val positionSecondsAgo = toSecondsAgo(position.time);
+                    val positionSecondsAgo = TimeHelper.toSecondsAgo(position.time);
 
                     val color = if (positionSecondsAgo <= 30) Color.GREEN
                     else if (positionSecondsAgo < 90) Color.YELLOW
                     else Color.RED
 
-                    val locationAgoSymbol = if (color == Color.GREEN) "\uD83D\uDFE2"
-                    else if (color == Color.YELLOW) "\uD83D\uDFE1"
-                    else "\uD83D\uDD34"
+                    val locationAgoSymbol = if (positionSecondsAgo <= 30) "🟢"
+                    else if (positionSecondsAgo < 90) "🟡"
+                    else if (positionSecondsAgo < 180) "🟠"
+                    else "🔴"
 
 
-                    val lastHeardAt = epochToIso8601(nodeInfo.lastHeard * 1000.toLong())
+                    val lastHeardAt = TimeHelper.epochToIso8601(nodeInfo.lastHeard * 1000.toLong())
 
-                    val lastHeardSecondsAgo = toSecondsAgo(nodeInfo.lastHeard);
+                    val lastHeardSecondsAgo = TimeHelper.toSecondsAgo(nodeInfo.lastHeard);
 
                     val lastHeardAgoColor = if (lastHeardSecondsAgo <= 30) Color.GREEN
                     else if (lastHeardSecondsAgo < 90) Color.YELLOW
@@ -156,13 +120,13 @@ public class GroupedSortedList {
                     else if (lastHeardAgoColor == Color.YELLOW) "💛"
                     else "💔"
 
-                    val positionTextAgo = toMomentAgo(position.time)
+                    val positionTextAgo = TimeHelper.toMomentAgo(position.time)
 
-                    val lastHeardAtFormated = epochToIso8601(nodeInfo.lastHeard * 1000.toLong(), shortTimeFormat)
-                    val updateAtFormated = epochToIso8601( System.currentTimeMillis(), shortTimeFormat)
+                    val lastHeardAtFormated = TimeHelper.epochToIso8601(nodeInfo.lastHeard * 1000.toLong(), shortTimeFormat)
+                    val updateAtFormated = TimeHelper.epochToIso8601( System.currentTimeMillis(), shortTimeFormat)
 
 
-                    val lastHeardTextAgo = toMomentAgo(nodeInfo.lastHeard)
+                    val lastHeardTextAgo = TimeHelper.toMomentAgo(nodeInfo.lastHeard)
 
                     shortName += "${locationAgoSymbol}${positionTextAgo} ${lastHeardAgoSymbol}${lastHeardTextAgo}_${updateAtFormated}"
 
@@ -177,7 +141,7 @@ public class GroupedSortedList {
                     details.add("Snr: ${nodeInfo.snr}")
                     details.add("Rssi: ${nodeInfo.rssi}")
                     details.add("LastHeardAt: ${lastHeardAt}")
-                    details.add("LastPositionAt: ${epochToIso8601(position.time * 1000.toLong())}")
+                    details.add("LastPositionAt: ${TimeHelper.epochToIso8601(position.time * 1000.toLong())}")
                     details.add("UID: ${nodeInfo.user?.id}")
 
 
@@ -214,6 +178,15 @@ public class GroupedSortedList {
                     }
 
 
+                    val range = 2;
+                    val precision = 0.00001
+                    val deltaLat = Random.nextInt(-range, range) * precision
+                    val deltaLon = Random.nextInt(-range, range) * precision
+
+                    val aLatLon = ALatLon(position.latitude + deltaLat, position.longitude + deltaLon)
+
+                    //val aLatLon = ALatLon(position.latitude, position.longitude )
+
                     AMapPoint(
                         "id_${nodeInfo.user?.id}",
                         shortName,
@@ -221,7 +194,7 @@ public class GroupedSortedList {
                         "MeshNode",
                         layerId,
                         color,
-                        ALatLon(position.latitude, position.longitude),
+                        aLatLon,
                         details,
                         params
                     )
@@ -229,4 +202,31 @@ public class GroupedSortedList {
             }
         }
     }
+
+
+    fun toWidgetInfo(layerId: String, applicationContext: Context, osmAndHelper: OsmAndHelper?): List<OsmandWidgetInfo> {
+
+        return groups.values.mapNotNull { group ->
+            group.lastOrNull()?.let { lastItem ->
+
+                lastItem.value.position?.let { position ->
+
+                    val nodeInfo = lastItem.value
+
+                    OsmandWidgetInfo(
+                        nodeInfo.user?.id,
+                        nodeInfo.user?.shortName,
+                        position.time,
+                        nodeInfo.lastHeard,
+                        nodeInfo.deviceMetrics?.batteryLevel,
+                        nodeInfo.snr,
+                        nodeInfo.rssi,
+                        position.latitude,
+                        position.longitude
+                    )
+                }
+            }
+        }
+    }
 }
+

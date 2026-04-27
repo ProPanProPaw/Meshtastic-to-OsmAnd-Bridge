@@ -640,7 +640,7 @@ class OsmAndAidlHelper(private val context: Context, private val listener: IOsmA
 
     companion object {
         private const val OSMAND_PLUS_PACKAGE_NAME = "net.osmand.plus"
-        private const val OSMAND_PACKAGE_NAME = OSMAND_PLUS_PACKAGE_NAME
+        public const val OSMAND_PACKAGE_NAME = OSMAND_PLUS_PACKAGE_NAME
 
         private const val MAX_RETRY_COUNT = 10
         private val BUFFER_SIZE = OsmandAidlConstants.COPY_FILE_PART_SIZE_LIMIT
