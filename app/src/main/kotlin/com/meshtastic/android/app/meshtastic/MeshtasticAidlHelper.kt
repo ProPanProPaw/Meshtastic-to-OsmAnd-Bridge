@@ -12,6 +12,7 @@ import android.util.Log
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
+import org.meshtastic.core.model.MyNodeInfo
 import org.meshtastic.core.model.NodeInfo
 import org.meshtastic.core.service.IMeshService
 import org.meshtastic.proto.MeshProtos
@@ -34,6 +35,7 @@ class MeshtasticAidlHelper(private val context: Context, private val listener: I
 
     companion object {
         const val TAG: String = "Mesh Service"
+        const val MESHTASTIC_PACKAGE_NAME: String = "com.geeksville.mesh"
     }
 
     private val peersMap = ConcurrentHashMap<String, MeshPeer>()
@@ -317,6 +319,23 @@ class MeshtasticAidlHelper(private val context: Context, private val listener: I
     public fun getMyId(): String? {
         try {
             return meshServiceAidlInterface?.getMyId()
+        } catch (e: Exception) {
+            return null
+        }
+    }
+    /*
+    public fun myNodeInfo(): MyNodeInfo? {
+
+        try {
+            return meshServiceAidlInterface?.myNodeInfo() as MyNodeInfo?
+        } catch (e: Exception) {
+            return null
+        }
+    }
+    */
+    public fun connectionState(): String? {
+        try {
+            return meshServiceAidlInterface?.connectionState()
         } catch (e: Exception) {
             return null
         }

@@ -47,6 +47,8 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
 
     private var osmAndLastAction: String? = null
     private var meshLastAction: String? = null
+    private var myMeshId: String? = null
+    private var meshConnectionState: String? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -78,12 +80,17 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
 
     private fun heartbeatCheck() {
 
-        val meshId = meshAidlHelper?.getMyId()
-        if (meshId == null) {
+        myMeshId = meshAidlHelper?.getMyId()
+        //val t = meshAidlHelper?.myNodeInfo()
+        meshConnectionState = meshAidlHelper?.connectionState()
+
+        if (meshConnectionState == null) {
             meshAidlHelper = MeshtasticAidlHelper(applicationContext, this@ForegroundService)
-            meshLastAction = "🖤 unsuccess";
+            meshLastAction = "🖤 no service";
+        } else if (myMeshId == null || meshConnectionState != "CONNECTED") {
+            meshLastAction = "💔 device $meshConnectionState";
         } else {
-            meshLastAction = "💚 success $meshId";
+            meshLastAction = "💚 $meshConnectionState $myMeshId";
         }
 
         val osmandAppInfo = OsmAndHolder.aidlHelper?.getAppInfo()
@@ -95,7 +102,7 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
             osmAndLastAction = "💚 success ${osmandAppInfo.osmAndVersion}";
         }
 
-
+        upsertMeshConnectOsmandWidget()
         updateNotification()
     }
 
@@ -198,6 +205,10 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
             osmAndLastAction = "✅ layer was updated"
         }*/
         updateNotification()
+    }
+
+    fun getVeryShortName(shortName: String?, userId: String): String {
+        return StringHelper.getFirstCodePoint(shortName) ?: userId.reversed().take(3).reversed()
     }
 
     fun sendPointesToOsmand() {
@@ -418,6 +429,9 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         upsertLastPositionOsmandWidget(widgetInfo)
         upsertLastHeardAtOsmandWidget(widgetInfo)
         upsertBatteryLevelOsmandWidget(widgetInfo)
+        upsertRssiOsmandWidget(widgetInfo)
+        upsertSnrOsmandWidget(widgetInfo)
+        upsertSignalOsmandWidget(widgetInfo)
     }
 
 
@@ -430,39 +444,37 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         val intentHelper = IntentHelper(applicationContext)
 
         val widgetId = "M2OB_lastPositionAt_${widgetInfo.userId!!}"
-        val menuIconName = "ic_action_time"
-        val veryShortName = StringHelper.getFirstCodePoint(widgetInfo.shortName) ?: widgetInfo.userId!!.take(3)
-        val menuTitle = "M2OB #${veryShortName} last position at"
-        val lightIconName = "ic_action_time"
-        val darkIconName = "ic_action_time"
+        val menuIconName = "widget_location_sharing_day"
+        val veryShortName = getVeryShortName(widgetInfo.shortName, widgetInfo.userId!!)
+        val menuTitle = "M2OB $veryShortName last position at"
 
         val lastPositionSecondsAgo = TimeHelper.toSecondsAgo(widgetInfo.positionTime)
         val momentAgo = MomentAgo(lastPositionSecondsAgo)
+
+
+        val lightIconName: String
+        val darkIconName: String
+
+        if (lastPositionSecondsAgo < 90) {
+            lightIconName = "widget_location_sharing_on_day"
+            darkIconName = "widget_location_sharing_on_night"
+        } else {
+            lightIconName = "widget_location_sharing_off_day"
+            darkIconName = "widget_location_sharing_off_night"
+        }
 
         val locationAgoSymbol = if (lastPositionSecondsAgo <= 30) "🟢"
         else if (lastPositionSecondsAgo < 90) "🟡"
         else if (lastPositionSecondsAgo < 180) "🟠"
         else "🔴"
 
-        val widgetText = "${veryShortName}: ${locationAgoSymbol}${momentAgo.value}"
-        val description = momentAgo.prefix
+        val widgetText = "$locationAgoSymbol${momentAgo.value}"
+        val description = "${momentAgo.prefix} $veryShortName"
         val order = 50
 
         val intentOnClick = intentHelper.getSetMapPositionIntent(widgetInfo.posLatitude, widgetInfo.posLongitude) ?: Intent()
 
         upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
-
-        val all = null
-        val none = emptyList<String>()
-        val APP_MODE_BICYCLE = "bicycle"
-        val bicycle = listOf(APP_MODE_BICYCLE)
-
-        Handler(Looper.getMainLooper()).postDelayed({
-
-            val res = OsmAndHolder.aidlHelper?.regWidgetAvailability(widgetId, bicycle)
-
-            val res2 = OsmAndHolder.aidlHelper?.regWidgetVisibility(widgetId, bicycle)
-        }, 700)
     }
 
 
@@ -475,34 +487,45 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         val intentHelper = IntentHelper(applicationContext)
 
         val widgetId = "M2OB_lastHeardAt_${widgetInfo.userId!!}"
-        val menuIconName = "ic_action_time"
-        val veryShortName = StringHelper.getFirstCodePoint(widgetInfo.shortName) ?: widgetInfo.userId!!.take(3)
-        val menuTitle = "M2OB #${veryShortName} last heard at"
-        val lightIconName = "ic_action_time"
-        val darkIconName = "ic_action_time"
-
+        val menuIconName = "widget_sensor_heart_rate_day"
+        val veryShortName = getVeryShortName(widgetInfo.shortName, widgetInfo.userId!!)
+        val menuTitle = "M2OB $veryShortName last heard at"
         val lastHeardSecondsAgo = TimeHelper.toSecondsAgo(widgetInfo.lastHeardAt)
         val momentAgo = MomentAgo(lastHeardSecondsAgo)
 
-        val symbol = if (lastHeardSecondsAgo <= 30) "💚"
-        else if (lastHeardSecondsAgo < 90) "💛"
-        else if (lastHeardSecondsAgo < 180) "🧡"
-        else "💔"
 
-        val widgetText = "${veryShortName}: ${symbol}${momentAgo.value}"
-        val description = momentAgo.prefix
+        val lightIconName: String
+        val darkIconName: String
+
+        if (lastHeardSecondsAgo < 90) {
+            lightIconName = "widget_sensor_heart_rate_day"
+            darkIconName = "widget_sensor_heart_rate_night"
+        } else {
+            lightIconName = "ic_action_sensor_heart_rate_outlined"
+            darkIconName = "ic_action_sensor_heart_rate_outlined"
+        }
+
+        val symbol: String
+        if (lastHeardSecondsAgo <= 30) {
+            symbol = "💚"
+        }
+        else if (lastHeardSecondsAgo < 90) {
+            symbol = "💛"
+        }
+        else if (lastHeardSecondsAgo < 180) {
+            symbol = "🧡"
+        }
+        else {
+            symbol = "💔"
+        }
+
+        val widgetText = "$symbol${momentAgo.value}"
+        val description = "${momentAgo.prefix} $veryShortName"
         val order = 50
 
         val intentOnClick = intentHelper.getSetMapPositionIntent(widgetInfo.posLatitude, widgetInfo.posLongitude) ?: Intent()
 
         upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
-
-        val all = null
-        val none = emptyList<String>()
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            OsmAndHolder.aidlHelper?.regWidgetVisibility(widgetId, all)
-        }, 700)
     }
 
     fun upsertBatteryLevelOsmandWidget(widgetInfo: OsmandWidgetInfo) {
@@ -514,33 +537,179 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         val intentHelper = IntentHelper(applicationContext)
 
         val widgetId = "M2OB_batteryLevel_${widgetInfo.userId!!}"
-        val menuIconName = "ic_action_time"
-        val veryShortName = StringHelper.getFirstCodePoint(widgetInfo.shortName) ?: widgetInfo.userId!!.take(3)
-        val menuTitle = "M2OB #${veryShortName} battery level"
-        val lightIconName = "ic_action_time"
-        val darkIconName = "ic_action_time"
+        val menuIconName = "widget_battery_day"
+        val veryShortName = getVeryShortName(widgetInfo.shortName, widgetInfo.userId!!)
+        val menuTitle = "M2OB $veryShortName battery level"
+        val lightIconName = "widget_battery_day"
+        val darkIconName = "widget_battery_night"
 
         val symbol = if (widgetInfo.batteryLevel == null) "❓"
         else if (widgetInfo.batteryLevel!! > 90)"🔋"
         else if (widgetInfo.batteryLevel!! > 75) "🟪"
         else if (widgetInfo.batteryLevel!! > 50) "🟨"
         else if (widgetInfo.batteryLevel!! > 30) "🟧"
-        else "🟥"
+        else "\uD83E\uDEAB"
 
-        val widgetText = "${veryShortName}: ${symbol}${widgetInfo.batteryLevel ?: ""}"
-        val description = "%"
+        val widgetText = "$symbol${widgetInfo.batteryLevel ?: ""}"
+        val description = "% $veryShortName"
         val order = 50
 
         val intentOnClick = intentHelper.getSetMapPositionIntent(widgetInfo.posLatitude, widgetInfo.posLongitude) ?: Intent()
 
         upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
+    }
 
-        val all = null
-        val none = emptyList<String>()
+    fun upsertRssiOsmandWidget(widgetInfo: OsmandWidgetInfo) {
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            OsmAndHolder.aidlHelper?.regWidgetVisibility(widgetId, all)
-        }, 700)
+        if(widgetInfo.userId == null) {
+            return
+        }
+
+        val intentHelper = IntentHelper(applicationContext)
+
+        val widgetId = "M2OB_rssi_${widgetInfo.userId!!}"
+        val menuIconName = "ic_action_signal"
+        val veryShortName = getVeryShortName(widgetInfo.shortName, widgetInfo.userId!!)
+        val menuTitle = "M2OB $veryShortName RSSI"
+
+
+        val lightIconName: String
+        val darkIconName: String
+        val rssi = widgetInfo.rssi
+
+        if (rssi == 0 || rssi == Int.MAX_VALUE) {
+            lightIconName = "ic_action_signal_not_found"
+            darkIconName = "ic_action_signal_not_found"
+        }
+        else if (rssi >= -70) {
+            lightIconName = "ic_action_signal_high"
+            darkIconName = "ic_action_signal_high"
+        }
+        else if (rssi >= -85) {
+            lightIconName = "ic_action_signal_middle"
+            darkIconName = "ic_action_signal_middle"
+        }
+        else if (rssi >= -100) {
+            lightIconName = "ic_action_signal_low"
+            darkIconName = "ic_action_signal_low"
+        }
+        else {
+            lightIconName = "ic_action_signal_not_found"
+            darkIconName = "ic_action_signal_not_found"
+        }
+
+        val widgetText = "$rssi"
+        val description = "dBm $veryShortName"
+        val order = 50
+
+        val intentOnClick = intentHelper.getSetMapPositionIntent(widgetInfo.posLatitude, widgetInfo.posLongitude) ?: Intent()
+
+        upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
+    }
+
+    fun upsertSnrOsmandWidget(widgetInfo: OsmandWidgetInfo) {
+
+        if(widgetInfo.userId == null) {
+            return
+        }
+
+        val intentHelper = IntentHelper(applicationContext)
+
+        val widgetId = "M2OB_snr_${widgetInfo.userId!!}"
+        val menuIconName = "ic_action_signal"
+        val veryShortName = getVeryShortName(widgetInfo.shortName, widgetInfo.userId!!)
+        val menuTitle = "M2OB $veryShortName SNR"
+
+
+        val lightIconName: String
+        val darkIconName: String
+
+        val snr = widgetInfo.snr
+
+        if(snr == 0f){
+            lightIconName = "ic_action_signal_not_found"
+            darkIconName = "ic_action_signal_not_found"
+        }
+        else if (snr >= 7) {
+            lightIconName = "ic_action_signal_high"
+            darkIconName = "ic_action_signal_high"
+        }
+        else if (snr >= 0) {
+            lightIconName = "ic_action_signal_middle"
+            darkIconName = "ic_action_signal_middle"
+        }
+        else if (snr >= -10) {
+            lightIconName = "ic_action_signal_low"
+            darkIconName = "ic_action_signal_low"
+        }
+        else {
+            lightIconName = "ic_action_signal_not_found"
+            darkIconName = "ic_action_signal_not_found"
+        }
+
+        val widgetText = String.format("%.1f", snr)
+        val description = "dB $veryShortName"
+        val order = 50
+
+        val intentOnClick = intentHelper.getSetMapPositionIntent(widgetInfo.posLatitude, widgetInfo.posLongitude) ?: Intent()
+
+        upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
+    }
+
+    fun upsertSignalOsmandWidget(widgetInfo: OsmandWidgetInfo) {
+
+        if(widgetInfo.userId == null) {
+            return
+        }
+
+        val intentHelper = IntentHelper(applicationContext)
+
+        val widgetId = "M2OB_signal_${widgetInfo.userId!!}"
+        val menuIconName = "ic_action_signal"
+        val veryShortName = getVeryShortName(widgetInfo.shortName, widgetInfo.userId!!)
+        val menuTitle = "M2OB $veryShortName signal"
+
+
+        val lightIconName: String
+        val darkIconName: String
+        val symbol: String
+
+        val snr = widgetInfo.snr
+        val rssi = widgetInfo.rssi
+        var description = "$veryShortName"
+
+        if (rssi == 0 || rssi == Int.MAX_VALUE || snr == 0f) {
+            lightIconName = "ic_action_signal_not_found"
+            darkIconName = "ic_action_signal_not_found"
+            symbol = "❓"
+            description = "sig $veryShortName"
+        }
+        else if (snr >= 7 && rssi >= -70) {
+            lightIconName = "ic_action_signal_high"
+            darkIconName = "ic_action_signal_high"
+            symbol = "hight"
+        }
+        else if (snr>= 0 && rssi >= -85) {
+            lightIconName = "ic_action_signal_middle"
+            darkIconName = "ic_action_signal_middle"
+            symbol = "middle"
+        }
+        else if (snr < -10 || rssi < -100) {
+            lightIconName = "ic_action_signal_not_found"
+            darkIconName = "ic_action_signal_not_found"
+            symbol = "❌"
+        }
+        else {
+            lightIconName = "ic_action_signal_low"
+            darkIconName = "ic_action_signal_low"
+            symbol = "low"
+        }
+
+        val widgetText = "$symbol"
+        val order = 50
+
+        val intentOnClick = intentHelper.getSetMapPositionIntent(widgetInfo.posLatitude, widgetInfo.posLongitude) ?: Intent()
+        upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
     }
 
     fun upsertOsmandWidget(id: String, menuIconName: String, menuTitle: String,
@@ -584,6 +753,41 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         } else {
             osmAndLastAction = "✅ widget was updated"
         }
+    }
+
+    fun upsertMeshConnectOsmandWidget() {
+
+        val intentHelper = IntentHelper(applicationContext)
+
+        val widgetId = "M2OB_mesh_connect"
+        val menuIconName = "ic_action_antenna"
+        val menuTitle = "M2OB Meshtastic connection"
+
+
+        val symbol: String
+        val description: String
+
+        val lightIconName = "ic_action_external_sensor_colored_day"
+        val darkIconName = "ic_action_external_sensor_colored_night"
+
+        if (myMeshId == null && meshConnectionState == null) {
+            symbol = "📴"
+            description = "mesh"
+        }
+        else {
+            val isMeshDisconnected = meshConnectionState == "DISCONNECTED"
+
+            symbol = if (isMeshDisconnected)  "🔴" else "🟢"
+            description = if (myMeshId != null)
+                getVeryShortName(null, myMeshId!!)
+            else "mesh ❓"
+        }
+
+        val widgetText = "$symbol"
+        val order = 50
+
+        val intentOnClick = intentHelper.getMeshtasticIntent() ?: Intent()
+        upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
     }
 
     fun recreateOsmandPoint(mapPoint: AMapPoint) {

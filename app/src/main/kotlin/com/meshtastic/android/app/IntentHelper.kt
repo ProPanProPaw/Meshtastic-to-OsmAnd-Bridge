@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import com.meshtastic.android.app.IntentHelper.Companion.IntentType
+import com.meshtastic.android.app.meshtastic.MeshtasticAidlHelper
 import com.meshtastic.android.app.osmand.OsmAndAidlHelper
 
 
@@ -42,10 +43,16 @@ public class IntentHelper {
 
         val intent: Intent? = packageManager
             .getLaunchIntentForPackage(OsmAndAidlHelper.OSMAND_PACKAGE_NAME)
-        if (intent != null) {
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-        }
+        return intent
+    }
+
+    fun getMeshtasticIntent(): Intent? {
+
+        val intent: Intent? = packageManager
+            .getLaunchIntentForPackage(MeshtasticAidlHelper.MESHTASTIC_PACKAGE_NAME)
+        intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
         return intent
     }
