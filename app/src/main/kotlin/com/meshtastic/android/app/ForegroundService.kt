@@ -5,7 +5,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Handler
@@ -73,6 +75,15 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
 
     }
 
+    fun isAppInstalled(context: Context, packageName: String): Boolean {
+        return try {
+            context.packageManager.getPackageInfo(packageName, 0)
+            true
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
+        }
+    }
+
 
     private fun resetOsmandAidlHelper(){
         OsmAndHolder.aidlHelper = OsmAndAidlHelper(applicationContext,this)
@@ -81,7 +92,6 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
     private fun heartbeatCheck() {
 
         myMeshId = meshAidlHelper?.getMyId()
-        //val t = meshAidlHelper?.myNodeInfo()
         meshConnectionState = meshAidlHelper?.connectionState()
 
         if (meshConnectionState == null) {

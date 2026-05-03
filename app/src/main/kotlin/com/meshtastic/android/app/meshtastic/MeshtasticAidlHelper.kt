@@ -323,16 +323,21 @@ class MeshtasticAidlHelper(private val context: Context, private val listener: I
             return null
         }
     }
-    /*
-    public fun myNodeInfo(): MyNodeInfo? {
+
+    public fun getMyNodeInfo(): MyNodeInfo? {
+
+        if (meshServiceAidlInterface == null) {
+            return null
+        }
 
         try {
-            return meshServiceAidlInterface?.myNodeInfo() as MyNodeInfo?
+            val res = meshServiceAidlInterface?.getMyNodeInfo()
+            return res
         } catch (e: Exception) {
             return null
         }
     }
-    */
+
     public fun connectionState(): String? {
         try {
             return meshServiceAidlInterface?.connectionState()
