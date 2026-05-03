@@ -16,11 +16,11 @@
  */
 
 include(
-    ":core:database",
     ":core:model",
     ":core:proto",
     ":core:service",
     ":core:strings",
+    ":core:data",
     ":app",
 )
 rootProject.name = "Meshtastic-to-OsmAnd-Bridge"

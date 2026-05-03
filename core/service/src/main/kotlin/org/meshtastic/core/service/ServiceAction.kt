@@ -17,7 +17,7 @@
 
 package org.meshtastic.core.service
 
-import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.model.Node
 import org.meshtastic.proto.AdminProtos
 
 sealed class ServiceAction {

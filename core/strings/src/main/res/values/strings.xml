@@ -1,24 +1,4 @@
 <resources>
-    <string name="unrecognized">Unrecognized</string>
-    <string name="message_status_enroute">Waiting to be acknowledged</string>
-    <string name="message_status_queued">Queued for sending</string>
-    <string name="routing_error_none">Acknowledged</string>
-    <string name="routing_error_no_route">No route</string>
-    <string name="routing_error_got_nak">Received a negative acknowledgment</string>
-    <string name="routing_error_timeout">Timeout</string>
-    <string name="routing_error_no_interface">No Interface</string>
-    <string name="routing_error_max_retransmit">Max Retransmission Reached</string>
-    <string name="routing_error_no_channel">No Channel</string>
-    <string name="routing_error_too_large">Packet too large</string>
-    <string name="routing_error_no_response">No response</string>
-    <string name="routing_error_bad_request">Bad Request</string>
-    <string name="routing_error_duty_cycle_limit">Regional Duty Cycle Limit Reached</string>
-    <string name="routing_error_not_authorized">Not Authorized</string>
-    <string name="routing_error_pki_failed">Encrypted Send Failed</string>
-    <string name="routing_error_pki_unknown_pubkey">Unknown Public Key</string>
-    <string name="routing_error_admin_bad_session_key">Bad session key</string>
-    <string name="routing_error_admin_public_key_unauthorized">Public Key unauthorized</string>
-
     <string name="label_very_long_slow">Very Long Range - Slow</string>
     <string name="label_long_fast">Long Range - Fast</string>
     <string name="label_long_moderate">Long Range - Moderate</string>
@@ -29,23 +9,6 @@
     <string name="label_short_fast">Short Range - Fast</string>
     <string name="label_short_slow">Short Range - Slow</string>
 
-    <string name="message_delivery_status">Message delivery status</string>
-    <string name="okay">OK</string>
-
-    <string name="delete">Delete</string>
-    <string name="message">Message</string>
-    <string name="delivery_confirmed">Delivery confirmed</string>
-    <string name="error">Error</string>
-
-    <string name="node_sort_alpha">A-Z</string>
-    <string name="node_sort_channel">Channel</string>
-    <string name="node_sort_distance">Distance</string>
-    <string name="node_sort_hops_away">Hops away</string>
-    <string name="node_sort_last_heard">Last heard</string>
-    <string name="node_sort_via_mqtt">via MQTT</string>
-    <string name="node_sort_via_favorite">via Favorite</string>
-
     <string name="unknown_age">Unknown Age</string>
-    <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
 
 </resources>

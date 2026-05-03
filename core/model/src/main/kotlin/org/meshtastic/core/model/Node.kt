@@ -15,12 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package org.meshtastic.core.database.model
+package org.meshtastic.core.model
 
 import android.graphics.Color
 import com.google.protobuf.ByteString
 import com.google.protobuf.kotlin.isNotEmpty
-import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.model.util.GPSFormat
 import org.meshtastic.core.model.util.UnitConversions.celsiusToFahrenheit
 import org.meshtastic.core.model.util.latLongToMeter
@@ -71,7 +70,7 @@ data class Node(
         get() = (publicKey ?: user.publicKey).isNotEmpty()
 
     val mismatchKey
-        get() = (publicKey ?: user.publicKey) == NodeEntity.ERROR_BYTE_STRING
+        get() = (publicKey ?: user.publicKey) == ByteString.copyFrom(ByteArray(32) { 0 })
 
     val hasEnvironmentMetrics: Boolean
         get() = environmentMetrics != EnvironmentMetrics.getDefaultInstance()
