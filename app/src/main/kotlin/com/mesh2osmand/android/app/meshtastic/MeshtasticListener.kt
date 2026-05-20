@@ -1,6 +1,6 @@
-package com.meshtastic.android.app.meshtastic
+package com.mesh2osmand.android.app.meshtastic
 
-import com.meshtastic.android.app.IAidlService
+import com.mesh2osmand.android.app.IAidlService
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo

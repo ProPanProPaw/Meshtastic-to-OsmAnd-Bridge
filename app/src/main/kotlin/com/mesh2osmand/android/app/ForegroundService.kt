@@ -1,5 +1,6 @@
-package com.meshtastic.android.app
+package com.mesh2osmand.android.app
 
+import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,22 +9,27 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
+import android.location.Location
+import android.location.LocationManager
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.meshtastic.android.app.meshtastic.IMeshtasticListener
-import com.meshtastic.android.app.meshtastic.MeshtasticAidlHelper
-import com.meshtastic.android.app.osmand.IOsmAndServiceListener
-import com.meshtastic.android.app.osmand.OsmAndAidlHelper
-import com.meshtastic.android.app.osmand.OsmAndHelper
+import com.mesh2osmand.android.app.meshtastic.IMeshtasticListener
+import com.mesh2osmand.android.app.meshtastic.MeshtasticAidlHelper
+import com.mesh2osmand.android.app.osmand.IOsmAndServiceListener
+import com.mesh2osmand.android.app.osmand.OsmAndAidlHelper
+import com.mesh2osmand.android.app.osmand.OsmAndHelper
+import com.mesh2osmand.android.app.osmand.OsmAndUtils
+import com.mesh2osmand.android.app.R
 import net.osmand.aidlapi.maplayer.point.AMapPoint
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.MeshUser
 import org.meshtastic.core.model.MessageStatus
 import org.meshtastic.core.model.NodeInfo
+import org.meshtastic.core.model.Position
 import org.meshtastic.proto.MeshProtos
 import java.util.Timer
 import java.util.TimerTask
@@ -298,7 +304,7 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         }
 
         positionsList.add(Item(from, NodeInfo(lastNodeInfo.num, lastNodeInfo.user,
-            org.meshtastic.core.model.Position(position), lastNodeInfo.snr, lastNodeInfo.rssi, lastNodeInfo.lastHeard)))
+            Position(position), lastNodeInfo.snr, lastNodeInfo.rssi, lastNodeInfo.lastHeard)))
 
         if(OsmAndHolder.aidlHelper == null){
             return
@@ -306,6 +312,17 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
 
         sendPointesToOsmand();
         updateNotification()
+    }
+
+    private fun getMyLocation(): Location? {
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return null
+        }
+
+        return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            ?: locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
     }
 
     override fun onNodeInfoReceived(
@@ -442,6 +459,7 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         upsertRssiOsmandWidget(widgetInfo)
         upsertSnrOsmandWidget(widgetInfo)
         upsertSignalOsmandWidget(widgetInfo)
+        upsertDistanceOsmandWidget(widgetInfo)
     }
 
 
@@ -719,6 +737,56 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         val order = 50
 
         val intentOnClick = intentHelper.getSetMapPositionIntent(widgetInfo.posLatitude, widgetInfo.posLongitude) ?: Intent()
+        upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
+    }
+
+    fun upsertDistanceOsmandWidget(widgetInfo: OsmandWidgetInfo) {
+
+        if(widgetInfo.userId == null) {
+            return
+        }
+
+        val intentHelper = IntentHelper(applicationContext)
+
+        val widgetId = "M2OB_lastPositionDistance_${widgetInfo.userId!!}"
+        val menuIconName = "widget_location_sharing_day"
+        val veryShortName = getVeryShortName(widgetInfo.shortName, widgetInfo.userId!!)
+        val menuTitle = "M2OB $veryShortName last position distance"
+
+        val myLocation = getMyLocation()
+        val distanceInMeters: Double?
+
+        if (myLocation != null) {
+            val myLat = myLocation.latitude
+            val myLon = myLocation.longitude
+
+            distanceInMeters = OsmAndUtils.getDistance(myLat, myLon, widgetInfo.posLatitude, widgetInfo.posLongitude)
+        } else {
+            distanceInMeters = null
+        }
+
+        val lightIconName: String
+        val darkIconName: String
+
+        if (distanceInMeters != null) {
+            lightIconName = "widget_location_sharing_on_day"
+            darkIconName = "widget_location_sharing_on_night"
+        } else {
+            lightIconName = "widget_location_sharing_off_day"
+            darkIconName = "widget_location_sharing_off_night"
+        }
+
+        val locationAgoSymbol = if (distanceInMeters == null || distanceInMeters >= 500) "🔴"
+        else if (distanceInMeters >= 100) "🟠"
+        else if (distanceInMeters >= 20) "🟡"
+        else "🟢"
+
+        val widgetText = "$locationAgoSymbol${distanceInMeters?.toInt()}"
+        val description = "m $veryShortName"
+        val order = 50
+
+        val intentOnClick = intentHelper.getDistanceWidgetClickedIntent(widgetInfo.posLatitude, widgetInfo.posLongitude) ?: Intent()
+
         upsertOsmandWidget(widgetId, menuIconName, menuTitle, lightIconName, darkIconName, widgetText, description, order, intentOnClick)
     }
 

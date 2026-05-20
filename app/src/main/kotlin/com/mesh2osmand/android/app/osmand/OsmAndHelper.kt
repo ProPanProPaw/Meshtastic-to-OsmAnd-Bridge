@@ -1,4 +1,4 @@
-package com.meshtastic.android.app.osmand
+package com.mesh2osmand.android.app.osmand
 
 import android.annotation.TargetApi
 import android.app.Activity
@@ -11,6 +11,7 @@ import android.widget.Toast
 import java.io.File
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
+import kotlin.collections.iterator
 
 class OsmAndHelper(private val cotnext: Context) {
 

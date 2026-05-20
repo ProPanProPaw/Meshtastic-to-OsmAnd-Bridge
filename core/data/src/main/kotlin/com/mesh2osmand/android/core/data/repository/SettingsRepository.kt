@@ -1,4 +1,4 @@
-package com.meshtastic.android.core.data.repository
+package com.mesh2osmand.android.core.data.repository
 
 import android.content.Context
 import androidx.datastore.preferences.core.edit

@@ -19,6 +19,7 @@ import com.geeksville.mesh.buildlogic.MeshtasticFlavor
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
+    alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
@@ -26,10 +27,11 @@ plugins {
 }
 
 android {
-    namespace = "com.meshtastic.android.app"
+    namespace = "com.mesh2osmand.android.app"
     defaultConfig {
+        versionName = "1.0.0"
         // Force this app to use the Google variant of any modules it's using that apply AndroidLibraryConventionPlugin
-        missingDimensionStrategy(FlavorDimension.marketplace.name, MeshtasticFlavor.google.name)
+        //missingDimensionStrategy(FlavorDimension.marketplace.name, MeshtasticFlavor.google.name)
     }
 }
 

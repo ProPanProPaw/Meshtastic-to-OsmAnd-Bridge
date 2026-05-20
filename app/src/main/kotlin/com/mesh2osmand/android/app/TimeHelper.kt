@@ -1,4 +1,4 @@
-package com.meshtastic.android.app
+package com.mesh2osmand.android.app
 
 
 import java.text.SimpleDateFormat

@@ -1,4 +1,4 @@
-package com.meshtastic.android.app.osmand
+package com.mesh2osmand.android.app.osmand
 
 import android.content.Context
 import android.database.Cursor

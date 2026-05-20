@@ -23,6 +23,7 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
+import java.util.Properties
 
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -37,6 +38,23 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
+
+
+                val props = Properties()
+                val propFile = rootProject.file("local.properties")
+                if (propFile.exists()) {
+                    propFile.inputStream().use { props.load(it) }
+                }
+
+                signingConfigs {
+                    create("release") {
+                        storeFile = props.getProperty("release.keystore.path")?.let { file(it) }
+                        storePassword = props.getProperty("release.keystore.password")
+                        keyAlias = props.getProperty("release.key.alias")
+                        keyPassword = props.getProperty("release.key.password")
+                    }
+                }
+
                 defaultConfig.targetSdk = 36
                 testOptions.animationsDisabled = true
 
@@ -48,14 +66,18 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
                 buildTypes {
                     getByName("release") {
-                        isMinifyEnabled = true
-                        isShrinkResources = true
+                        //isMinifyEnabled = true // TODO: crash
+                        isMinifyEnabled = false
+                        //isShrinkResources = true  // TODO: crash
+                        isShrinkResources = false
+                        signingConfig = signingConfigs.getByName("release")
                         proguardFiles(
                             getDefaultProguardFile("proguard-android-optimize.txt"),
                             "proguard-rules.pro"
                         )
                     }
                     getByName("debug") {
+                        applicationIdSuffix = ".debug"
                         isDebuggable = true
                         isPseudoLocalesEnabled = true
                     }

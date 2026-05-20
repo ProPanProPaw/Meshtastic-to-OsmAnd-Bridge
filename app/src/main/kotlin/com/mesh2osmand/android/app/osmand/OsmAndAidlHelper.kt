@@ -1,4 +1,4 @@
-package com.meshtastic.android.app.osmand
+package com.mesh2osmand.android.app.osmand
 
 import android.content.ComponentName
 import android.content.Context
@@ -29,6 +29,7 @@ import net.osmand.aidlapi.favorite.group.AddFavoriteGroupParams
 import net.osmand.aidlapi.favorite.group.RemoveFavoriteGroupParams
 import net.osmand.aidlapi.favorite.group.UpdateFavoriteGroupParams
 import net.osmand.aidlapi.gpx.*
+import net.osmand.aidlapi.info.AppInfoParams
 import net.osmand.aidlapi.info.GetTextParams
 import net.osmand.aidlapi.logcat.ALogcatListenerParams
 import net.osmand.aidlapi.logcat.OnLogcatMessageParams
@@ -626,7 +627,7 @@ class OsmAndAidlHelper(private val context: Context, private val listener: IOsmA
         return executeWithResult(block) ?: false
     }
 
-    public fun getAppInfo(): net.osmand.aidlapi.info.AppInfoParams? {
+    public fun getAppInfo(): AppInfoParams? {
         try {
             return mIOsmAndAidlInterface?.getAppInfo()
         } catch (e: Exception) {

@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.meshtastic.android.core.data"
+    namespace = "com.mesh2osmand.android.core.data"
 }
 
 dependencies {

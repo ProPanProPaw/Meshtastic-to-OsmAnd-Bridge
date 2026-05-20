@@ -1,4 +1,4 @@
-package com.meshtastic.android.app.meshtastic
+package com.mesh2osmand.android.app.meshtastic
 
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -248,6 +248,8 @@ class MeshtasticAidlHelper(private val context: Context, private val listener: I
             val intent = Intent("com.geeksville.mesh.Service").apply {
                 setClassName("com.geeksville.mesh", "com.geeksville.mesh.service.MeshService")
             }
+
+            val wasBinded = context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)
 
             return if (context.bindService(intent, mConnection, Context.BIND_AUTO_CREATE)) {
                 listener?.onServiceBinded(TAG)

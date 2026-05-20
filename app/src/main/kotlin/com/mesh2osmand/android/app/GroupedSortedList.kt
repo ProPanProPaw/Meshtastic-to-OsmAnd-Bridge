@@ -1,4 +1,4 @@
-package com.meshtastic.android.app
+package com.mesh2osmand.android.app
 
 import android.content.Context
 import android.content.Intent
@@ -8,16 +8,12 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.core.content.FileProvider
-import com.meshtastic.android.app.osmand.OsmAndHelper
+import com.mesh2osmand.android.app.osmand.OsmAndHelper
 import net.osmand.aidlapi.map.ALatLon
 import net.osmand.aidlapi.maplayer.point.AMapPoint
 import org.meshtastic.core.model.NodeInfo
 import java.io.File
 import java.io.FileOutputStream
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 import kotlin.random.Random
 
 
@@ -128,7 +124,7 @@ public class GroupedSortedList {
 
                     val lastHeardTextAgo = TimeHelper.toMomentAgo(nodeInfo.lastHeard)
 
-                    shortName += "${locationAgoSymbol}${positionTextAgo} ${lastHeardAgoSymbol}${lastHeardTextAgo}_${updateAtFormated}"
+                    //shortName += "${locationAgoSymbol}${positionTextAgo} ${lastHeardAgoSymbol}${lastHeardTextAgo}_${updateAtFormated}"
 
 
                     val fullName = nodeInfo.user?.longName ?: nodeInfo.user?.shortName ?: "❓"
