@@ -460,6 +460,8 @@ class ForegroundService : Service(), IMeshtasticListener, IOsmAndServiceListener
         upsertSnrOsmandWidget(widgetInfo)
         upsertSignalOsmandWidget(widgetInfo)
         upsertDistanceOsmandWidget(widgetInfo)
+
+        // TODO: satelites widget
     }
 
 

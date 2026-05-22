@@ -16,6 +16,7 @@
 .cxx
 /buildSrc/build
 **/debug/**
+!/app/src/debug/**
 **/release/**
 
 # Java KeyStore certificates

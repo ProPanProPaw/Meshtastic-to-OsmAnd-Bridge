@@ -27,7 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.App"
         tools:targetApi="31"
-        tools:replace="android:allowBackup">
+        tools:replace="android:label,android:allowBackup">
 
         <provider
             android:name="androidx.core.content.FileProvider"
